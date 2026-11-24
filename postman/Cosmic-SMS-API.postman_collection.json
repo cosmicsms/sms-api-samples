@@ -1,0 +1,87 @@
+{
+  "info": {
+    "name": "Cosmic SMS API",
+    "description": "UK business SMS - REST API for sending, tracking and receiving SMS.  Set the collection variables USERNAME and API_PASSWORD (from the web app's Settings page), then every request is ready to send.  Docs: https://www.cosmicsms.com/guide-api · Machine-readable spec: https://www.cosmicsms.com/cosmic-sms-api.md",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "basic",
+    "basic": [
+      { "key": "username", "value": "{{USERNAME}}", "type": "string" },
+      { "key": "password", "value": "{{API_PASSWORD}}", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://api.cosmicsms.com" },
+    { "key": "USERNAME", "value": "" },
+    { "key": "API_PASSWORD", "value": "" },
+    { "key": "batch_id", "value": "20154010" }
+  ],
+  "item": [
+    {
+      "name": "Send SMS",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/xml" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<sendsms>\n  <sender>CosmicSMS</sender>\n  <message>Hello from Cosmic SMS!</message>\n  <mobiles>\n    <mobile>447700900701</mobile>\n  </mobiles>\n</sendsms>"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/prod/rest/sms/send",
+          "host": [ "{{baseUrl}}" ],
+          "path": [ "prod", "rest", "sms", "send" ]
+        },
+        "description": "Send to 1-500 recipients.  Optional elements: <sendtime>2026-07-01T13:15Z</sendtime> (ISO-8601, omit = send now) and <multilingual>2</multilingual> (0=GSM-7, 1=Unicode, 2=auto).  The response's <batch> id is used by the Status and Cancel requests."
+      }
+    },
+    {
+      "name": "Delivery status for a batch",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/prod/rest/sms/status/{{batch_id}}",
+          "host": [ "{{baseUrl}}" ],
+          "path": [ "prod", "rest", "sms", "status", "{{batch_id}}" ]
+        },
+        "description": "Per-recipient delivery status: DELIVERED, FAILED, REJECTED, UNKNOWN or PENDING.  Set the batch_id variable from a send response."
+      }
+    },
+    {
+      "name": "Inbound messages",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/prod/rest/sms/receive",
+          "host": [ "{{baseUrl}}" ],
+          "path": [ "prod", "rest", "sms", "receive" ]
+        },
+        "description": "Messages received on your virtual mobile number.  Optional date-range path segments: /receive/{from}/{to} with dates as yyyyMMddHHmm.  No dates returns the last 24 hours."
+      }
+    },
+    {
+      "name": "Cancel a scheduled batch",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/prod/rest/sms/cancel/{{batch_id}}",
+          "host": [ "{{baseUrl}}" ],
+          "path": [ "prod", "rest", "sms", "cancel", "{{batch_id}}" ]
+        },
+        "description": "Cancels a batch that was scheduled with <sendtime> and has not yet been sent."
+      }
+    },
+    {
+      "name": "Account balance",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/prod/rest/account/balance",
+          "host": [ "{{baseUrl}}" ],
+          "path": [ "prod", "rest", "account", "balance" ]
+        },
+        "description": "Current credit balance for the authenticated account."
+      }
+    }
+  ]
+}
